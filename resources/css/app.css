@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+   LOGIKA UTAMA TAILWIND 4:
+   Baris ini memaksa Tailwind untuk mengaktifkan 'dark:'
+   HANYA jika ada class .dark di elemen <html>.
+   Ini akan mengabaikan pengaturan mode gelap di Windows Anda.
+*/
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+    /* Mengatur sistem warna agar scrollbar ikut berubah */
+    html { color-scheme: light; }
+    html.dark { color-scheme: dark; }
+
+    /* Transisi Halus Global */
+    html, body {
+        @apply transition-colors duration-500 ease-in-out;
+    }
+}
+
+/* Transisi untuk elemen UI */
+@layer components {
+    div, nav, header, section, table, button, a {
+        @apply transition-colors duration-500;
+    }
+}
