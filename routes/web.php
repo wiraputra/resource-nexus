@@ -3,7 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ResourceController;
 use App\Http\Controllers\Admin\BookingController;
-use App\Http\Controllers\Admin\ReportController; // Tambahkan import ini
+use App\Http\Controllers\Admin\ReportController;
 // Import Model agar data bisa ditarik ke dashboard
 use App\Models\Resource;
 use App\Models\Booking;
@@ -77,7 +77,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/bookings', [BookingController::class, 'index'])->name('admin.bookings.index');
     Route::post('/admin/bookings', [BookingController::class, 'store'])->name('admin.bookings.store');
 
-    // --- Route PDF Reporting (BARU) ---
+    // Route Kalender Visual (BARU)
+    Route::get('/admin/calendar', [BookingController::class, 'calendar'])->name('admin.calendar');
+
+    // --- Route PDF Reporting ---
     Route::get('/admin/reports/bookings/pdf', [ReportController::class, 'downloadBookings'])->name('admin.reports.bookings.pdf');
 });
 

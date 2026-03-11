@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Resource;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse; // Tambahkan ini
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
-use Inertia\Response; // Tambahkan ini
+use Inertia\Response;
 
 class BookingController extends Controller
 {
@@ -21,6 +21,31 @@ class BookingController extends Controller
             'bookings' => Booking::with(['user', 'resource.category'])
                 ->latest()
                 ->get()
+        ]);
+    }
+
+    /**
+     * Menampilkan halaman kalender peminjaman secara visual.
+     */
+    public function calendar(): Response
+    {
+        // Ambil data booking dan ubah formatnya untuk FullCalendar
+        $events = Booking::with(['resource', 'user'])
+            ->whereIn('status', ['approved', 'pending'])
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'id'    => $booking->id,
+                    'title' => ($booking->resource->name ?? 'Deleted') . ' (' . ($booking->user->name ?? 'User') . ')',
+                    'start' => $booking->start_time,
+                    'end'   => $booking->end_time,
+                    // Penentuan warna berdasarkan status
+                    'color' => $booking->status === 'approved' ? '#3b82f6' : '#f59e0b',
+                ];
+            });
+
+        return Inertia::render('Admin/Bookings/Calendar', [
+            'events' => $events
         ]);
     }
 
@@ -41,16 +66,15 @@ class BookingController extends Controller
         $end = $request->end_time;
 
         // 2. LOGIKA INTI: Cek Overlap (Jadwal Bentrok)
-        // Logika: (Mulai_A < Selesai_B) DAN (Selesai_A > Mulai_B)
         $isConflict = Booking::where('resource_id', $resourceId)
             ->where(function ($query) use ($start, $end) {
                 $query->where('start_time', '<', $end)
                       ->where('end_time', '>', $start);
             })
-            ->whereIn('status', ['approved', 'pending']) // Cek hanya yang statusnya aktif
+            ->whereIn('status', ['approved', 'pending'])
             ->exists();
 
-        // 3. Jika bentrok, kembalikan dengan pesan error di field start_time
+        // 3. Jika bentrok, kembalikan dengan pesan error
         if ($isConflict) {
             return back()->withErrors([
                 'start_time' => 'Maaf, aset ini sudah dipesan orang lain pada rentang waktu tersebut.'

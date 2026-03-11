@@ -36,7 +36,6 @@ export default function Authenticated({
                                     Dashboard
                                 </NavLink>
 
-                                {/* Link Menu Resources */}
                                 <NavLink
                                     href={route('admin.resources')}
                                     active={route().current('admin.resources*')}
@@ -44,12 +43,19 @@ export default function Authenticated({
                                     Resources
                                 </NavLink>
 
-                                {/* Link Menu Bookings */}
                                 <NavLink
                                     href={route('admin.bookings.index')}
                                     active={route().current('admin.bookings.index')}
                                 >
                                     Bookings
+                                </NavLink>
+
+                                {/* LINK MENU CALENDAR (BARU) */}
+                                <NavLink
+                                    href={route('admin.calendar')}
+                                    active={route().current('admin.calendar')}
+                                >
+                                    Calendar
                                 </NavLink>
                             </div>
                         </div>
@@ -157,7 +163,6 @@ export default function Authenticated({
                             Dashboard
                         </ResponsiveNavLink>
 
-                        {/* Mobile Resources Link */}
                         <ResponsiveNavLink
                             href={route('admin.resources')}
                             active={route().current('admin.resources*')}
@@ -165,12 +170,19 @@ export default function Authenticated({
                             Resources
                         </ResponsiveNavLink>
 
-                        {/* Mobile Bookings Link */}
                         <ResponsiveNavLink
                             href={route('admin.bookings.index')}
                             active={route().current('admin.bookings.index')}
                         >
                             Bookings
+                        </ResponsiveNavLink>
+
+                        {/* MOBILE CALENDAR LINK (BARU) */}
+                        <ResponsiveNavLink
+                            href={route('admin.calendar')}
+                            active={route().current('admin.calendar')}
+                        >
+                            Calendar
                         </ResponsiveNavLink>
                     </div>
 
