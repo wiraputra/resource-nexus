@@ -10,6 +10,8 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request; // Tambahkan ini
+use Illuminate\Support\Facades\Http; // Tambahkan ini
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -37,6 +39,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'categories' => Category::withCount('resources')->get(),
         ]);
     })->name('dashboard');
+
+    // Route API Proxy untuk Cuaca (BARU)
+    Route::get('/api/weather', function (Request $request) {
+        $lat = $request->lat;
+        $lon = $request->lon;
+        // Mengambil API Key dari file .env
+        $apiKey = env('OPENWEATHER_API_KEY');
+
+        $response = Http::get("https://api.openweathermap.org/data/2.5/weather", [
+            'lat' => $lat,
+            'lon' => $lon,
+            'appid' => $apiKey,
+            'units' => 'metric', // Celcius
+            'lang' => 'id'       // Bahasa Indonesia
+        ]);
+
+        return $response->json();
+    });
 
     // Route untuk Management Resource (Sisi Admin)
     Route::get('/admin/resources', [ResourceController::class, 'index'])->name('admin.resources');

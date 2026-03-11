@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 
@@ -7,19 +7,33 @@ interface Resource {
     name: string;
     description: string;
     status: string;
+    image?: string; // Tambahkan image
     category: {
         name: string;
     };
 }
 
 export default function Index({ resources }: { resources: Resource[] }) {
-    const { flash, errors }: any = usePage().props;
+    // Ambil flash, errors, dan filters (kata kunci pencarian sebelumnya)
+    const { flash, errors, filters }: any = usePage().props;
+
+    // State untuk input pencarian
+    const [search, setSearch] = useState(filters?.search || '');
 
     const [bookingForm, setBookingForm] = useState({
         resource_id: null as number | null,
         start_time: '',
         end_time: '',
     });
+
+    // Fungsi untuk menjalankan pencarian
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        router.get(route('admin.resources'), { search: search }, {
+            preserveState: true,
+            replace: true
+        });
+    };
 
     const handleDelete = (id: number, name: string) => {
         if (confirm(`Are you sure you want to delete "${name}"?`)) {
@@ -76,85 +90,117 @@ export default function Index({ resources }: { resources: Resource[] }) {
                         </div>
                     )}
 
-                    <div className="flex justify-between items-end mb-8">
-                        <div>
+                    {/* Section Header & Search */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+                        <div className="w-full md:w-auto text-center md:text-left">
                             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">All Resources</h1>
-                            <p className="text-slate-500 text-sm">Manage assets and make quick bookings.</p>
+                            <p className="text-slate-500 text-sm">Find and book your company assets.</p>
                         </div>
 
-                        <Link
-                            href={route('admin.resources.create')}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 font-bold text-sm"
-                        >
-                            + Add New Resource
-                        </Link>
+                        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                            {/* Form Pencarian */}
+                            <form onSubmit={handleSearch} className="relative w-full md:w-80">
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Search by name..."
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 dark:bg-slate-900 dark:border-slate-800 dark:text-white text-sm focus:ring-blue-500 shadow-sm"
+                                />
+                                <div className="absolute left-3 top-3 text-slate-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                            </form>
+
+                            <Link
+                                href={route('admin.resources.create')}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 font-bold text-sm w-full md:w-auto text-center"
+                            >
+                                + Add New
+                            </Link>
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Grid List */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {resources.map((item) => (
-                            <div key={item.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between group">
-                                <div>
-                                    <div className="mb-4 flex justify-between items-start">
-                                        <span className="px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded-lg uppercase tracking-widest">
+                            <div key={item.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm flex flex-col group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+
+                                {/* Image Display */}
+                                <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                    {item.image ? (
+                                        <img
+                                            src={`/storage/${item.image}`}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            alt={item.name}
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold text-xs uppercase tracking-widest">
+                                            No Image Available
+                                        </div>
+                                    )}
+                                    <div className="absolute top-4 left-4">
+                                        <span className="px-3 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur shadow-sm text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded-lg uppercase tracking-widest">
                                             {item.category.name}
                                         </span>
-                                        <div className="flex gap-3 items-center">
-                                            {/* TOMBOL EDIT (BARU) */}
-                                            <Link
-                                                href={route('admin.resources.edit', item.id)}
-                                                className="text-slate-400 hover:text-blue-600 transition-colors"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                </svg>
-                                            </Link>
-
-                                            {/* TOMBOL DELETE */}
-                                            <button onClick={() => handleDelete(item.id, item.name)} className="text-slate-400 hover:text-red-600 transition-colors cursor-pointer">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
                                     </div>
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
-                                        {item.name}
-                                    </h3>
-                                    <p className="mt-2 text-slate-500 dark:text-slate-400 text-sm line-clamp-2 italic">
-                                        Status: {item.status}
-                                    </p>
                                 </div>
 
-                                <form onSubmit={(e) => handleBooking(e, item.id)} className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Quick Booking</p>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <input
-                                            type="datetime-local"
-                                            required
-                                            className="text-[10px] p-2 rounded-lg border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white w-full"
-                                            onChange={e => setBookingForm({...bookingForm, start_time: e.target.value})}
-                                        />
-                                        <input
-                                            type="datetime-local"
-                                            required
-                                            className="text-[10px] p-2 rounded-lg border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white w-full"
-                                            onChange={e => setBookingForm({...bookingForm, end_time: e.target.value})}
-                                        />
+                                <div className="p-6 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                                                {item.name}
+                                            </h3>
+                                            <div className="flex gap-3">
+                                                <Link href={route('admin.resources.edit', item.id)} className="text-slate-400 hover:text-blue-600 transition-colors">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                </Link>
+                                                <button onClick={() => handleDelete(item.id, item.name)} className="text-slate-400 hover:text-red-600 transition-colors cursor-pointer">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 mb-4">
+                                            {item.description || 'No description provided.'}
+                                        </p>
+                                        <div className="flex items-center gap-2 mb-6">
+                                            <span className={`h-2 w-2 rounded-full ${item.status === 'available' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+                                            <span className="text-[10px] font-black uppercase text-slate-400">{item.status}</span>
+                                        </div>
                                     </div>
-                                    <button
-                                        type="submit"
-                                        className="w-full bg-slate-900 dark:bg-blue-600 text-white text-[11px] font-bold py-2 rounded-xl hover:bg-blue-600 transition-colors shadow-md"
-                                    >
-                                        Book Now
-                                    </button>
-                                </form>
+
+                                    {/* Quick Booking */}
+                                    <form onSubmit={(e) => handleBooking(e, item.id)} className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <input
+                                                type="datetime-local"
+                                                required
+                                                className="text-[10px] p-2 rounded-lg border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white w-full"
+                                                onChange={e => setBookingForm({...bookingForm, start_time: e.target.value})}
+                                            />
+                                            <input
+                                                type="datetime-local"
+                                                required
+                                                className="text-[10px] p-2 rounded-lg border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white w-full"
+                                                onChange={e => setBookingForm({...bookingForm, end_time: e.target.value})}
+                                            />
+                                        </div>
+                                        <button type="submit" className="w-full bg-slate-900 dark:bg-blue-600 text-white text-[11px] font-bold py-2.5 rounded-xl hover:opacity-90 transition-all">
+                                            Quick Reserve
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         ))}
                     </div>
 
                     {resources.length === 0 && (
-                        <div className="text-center py-24 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                            <p className="text-slate-400 font-medium">No resources found.</p>
+                        <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                            <p className="text-slate-400 font-bold">No assets match your search.</p>
+                            <Link href={route('admin.resources')} className="text-blue-600 text-xs mt-2 inline-block font-bold uppercase">Clear Filters</Link>
                         </div>
                     )}
 

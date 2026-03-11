@@ -1,7 +1,36 @@
+import React, { useState, useEffect } from 'react'; // Tambahkan useState & useEffect
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 
 export default function Dashboard({ stats, recent_bookings, categories }: any) {
+    // State untuk mengelola data cuaca
+    const [weather, setWeather] = useState<any>(null);
+    const [loadingWeather, setLoadingWeather] = useState(true);
+
+    useEffect(() => {
+        // Ambil lokasi pengguna via browser
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const { latitude, longitude } = position.coords;
+
+                try {
+                    // Panggil route API proxy yang sudah kita buat di web.php
+                    const response = await fetch(`/api/weather?lat=${latitude}&lon=${longitude}`);
+                    const data = await response.json();
+                    setWeather(data);
+                } catch (error) {
+                    console.error("Gagal mengambil data cuaca", error);
+                } finally {
+                    setLoadingWeather(false);
+                }
+            }, () => {
+                setLoadingWeather(false); // Handle jika user menolak izin lokasi
+            });
+        } else {
+            setLoadingWeather(false);
+        }
+    }, []);
+
     return (
         <AuthenticatedLayout
             header={<h2 className="text-xl font-bold leading-tight text-slate-800 dark:text-slate-100">Executive Overview</h2>}
@@ -10,6 +39,46 @@ export default function Dashboard({ stats, recent_bookings, categories }: any) {
 
             <div className="py-12 bg-slate-50 dark:bg-slate-950 min-h-screen">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-8">
+
+                    {/* HEADER SECTION DENGAN WIDGET CUACA */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-4">
+                        <div>
+                            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Welcome Back!</h1>
+                            <p className="text-slate-500">System is running smoothly. Here is your daily summary.</p>
+                        </div>
+
+                        {/* WIDGET CUACA MODERN */}
+                        <div className="bg-white/40 dark:bg-blue-900/10 backdrop-blur-xl border border-white/20 dark:border-blue-900/30 p-4 rounded-[2.5rem] flex items-center gap-5 shadow-2xl shadow-blue-500/10 min-w-[280px] transition-all hover:scale-[1.02]">
+                            {loadingWeather ? (
+                                <div className="flex items-center gap-3 px-4 py-2">
+                                    <div className="h-2 w-2 bg-blue-500 rounded-full animate-ping"></div>
+                                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em]">Detecting Location...</span>
+                                </div>
+                            ) : weather?.main ? (
+                                <>
+                                    <div className="bg-blue-500/10 dark:bg-blue-500/20 p-2 rounded-2xl shadow-inner">
+                                        <img
+                                            src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+                                            className="h-12 w-12 drop-shadow-lg"
+                                            alt="weather"
+                                        />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-black text-slate-900 dark:text-white leading-none mb-1">
+                                            {Math.round(weather.main.temp)}°C
+                                        </p>
+                                        <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest leading-none truncate max-w-[150px]">
+                                            {weather.name}, {weather.weather[0].description}
+                                        </p>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    Weather unavailable
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
                     {/* 1. Stat Cards Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -85,7 +154,7 @@ export default function Dashboard({ stats, recent_bookings, categories }: any) {
     );
 }
 
-// Sub-component untuk Card Statistik agar kode tetap rapi
+// Sub-component StatCard
 function StatCard({ title, value, color, icon }: any) {
     const colors: any = {
         blue: "text-blue-600 bg-blue-50 dark:bg-blue-900/20 border-blue-100",
