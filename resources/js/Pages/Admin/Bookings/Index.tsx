@@ -28,9 +28,24 @@ export default function Index({ bookings = [] }: { bookings: Booking[] }) {
             <div className="py-12 bg-slate-50 dark:bg-slate-950 min-h-screen">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
-                    <div className="mb-8">
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Booking History</h1>
-                        <p className="text-slate-500 text-sm">Monitor who is using what and when.</p>
+                    {/* Section Header & Download Action */}
+                    <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Booking History</h1>
+                            <p className="text-slate-500 text-sm">Monitor who is using what and when.</p>
+                        </div>
+
+                        {/* TOMBOL DOWNLOAD PDF (BARU) */}
+                        {/* Menggunakan tag <a> biasa karena ini adalah unduhan file fisik */}
+                        <a
+                            href={route('admin.reports.bookings.pdf')}
+                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Download Report (PDF)
+                        </a>
                     </div>
 
                     <div className="bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden">

@@ -7,17 +7,15 @@ interface Resource {
     name: string;
     description: string;
     status: string;
-    image?: string; // Tambahkan image
+    image?: string;
     category: {
         name: string;
     };
 }
 
 export default function Index({ resources }: { resources: Resource[] }) {
-    // Ambil flash, errors, dan filters (kata kunci pencarian sebelumnya)
     const { flash, errors, filters }: any = usePage().props;
 
-    // State untuk input pencarian
     const [search, setSearch] = useState(filters?.search || '');
 
     const [bookingForm, setBookingForm] = useState({
@@ -26,7 +24,6 @@ export default function Index({ resources }: { resources: Resource[] }) {
         end_time: '',
     });
 
-    // Fungsi untuk menjalankan pencarian
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         router.get(route('admin.resources'), { search: search }, {
@@ -36,7 +33,7 @@ export default function Index({ resources }: { resources: Resource[] }) {
     };
 
     const handleDelete = (id: number, name: string) => {
-        if (confirm(`Are you sure you want to delete "${name}"?`)) {
+        if (confirm(`Are you sure you want to move "${name}" to the Trash Bin?`)) {
             router.delete(route('admin.resources.destroy', id), {
                 preserveScroll: true,
             });
@@ -93,12 +90,24 @@ export default function Index({ resources }: { resources: Resource[] }) {
                     {/* Section Header & Search */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
                         <div className="w-full md:w-auto text-center md:text-left">
-                            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">All Resources</h1>
+                            <div className="flex items-center justify-center md:justify-start gap-3">
+                                <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">All Resources</h1>
+
+                                {/* LINK KE TRASH CAN (BARU) */}
+                                <Link
+                                    href={route('admin.resources.trashed')}
+                                    className="p-2 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-red-500 transition-all shadow-sm border border-slate-200 dark:border-slate-700 group"
+                                    title="View Trash Can"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </Link>
+                            </div>
                             <p className="text-slate-500 text-sm">Find and book your company assets.</p>
                         </div>
 
                         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                            {/* Form Pencarian */}
                             <form onSubmit={handleSearch} className="relative w-full md:w-80">
                                 <input
                                     type="text"
@@ -128,7 +137,6 @@ export default function Index({ resources }: { resources: Resource[] }) {
                         {resources.map((item) => (
                             <div key={item.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm flex flex-col group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
 
-                                {/* Image Display */}
                                 <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                                     {item.image ? (
                                         <img
@@ -137,12 +145,12 @@ export default function Index({ resources }: { resources: Resource[] }) {
                                             alt={item.name}
                                         />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold text-xs uppercase tracking-widest">
+                                        <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold text-[10px] uppercase tracking-widest">
                                             No Image Available
                                         </div>
                                     )}
                                     <div className="absolute top-4 left-4">
-                                        <span className="px-3 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur shadow-sm text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded-lg uppercase tracking-widest">
+                                        <span className="px-3 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur shadow-sm text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded-lg uppercase tracking-widest border border-white/20">
                                             {item.category.name}
                                         </span>
                                     </div>
@@ -168,27 +176,26 @@ export default function Index({ resources }: { resources: Resource[] }) {
                                         </p>
                                         <div className="flex items-center gap-2 mb-6">
                                             <span className={`h-2 w-2 rounded-full ${item.status === 'available' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
-                                            <span className="text-[10px] font-black uppercase text-slate-400">{item.status}</span>
+                                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter italic">{item.status}</span>
                                         </div>
                                     </div>
 
-                                    {/* Quick Booking */}
                                     <form onSubmit={(e) => handleBooking(e, item.id)} className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
                                         <div className="grid grid-cols-2 gap-2">
                                             <input
                                                 type="datetime-local"
                                                 required
-                                                className="text-[10px] p-2 rounded-lg border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white w-full"
+                                                className="text-[10px] p-2 rounded-lg border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white w-full focus:ring-blue-500"
                                                 onChange={e => setBookingForm({...bookingForm, start_time: e.target.value})}
                                             />
                                             <input
                                                 type="datetime-local"
                                                 required
-                                                className="text-[10px] p-2 rounded-lg border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white w-full"
+                                                className="text-[10px] p-2 rounded-lg border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-white w-full focus:ring-blue-500"
                                                 onChange={e => setBookingForm({...bookingForm, end_time: e.target.value})}
                                             />
                                         </div>
-                                        <button type="submit" className="w-full bg-slate-900 dark:bg-blue-600 text-white text-[11px] font-bold py-2.5 rounded-xl hover:opacity-90 transition-all">
+                                        <button type="submit" className="w-full bg-slate-900 dark:bg-blue-600 text-white text-[11px] font-bold py-2.5 rounded-xl hover:opacity-90 transition-all shadow-md">
                                             Quick Reserve
                                         </button>
                                     </form>
@@ -199,8 +206,8 @@ export default function Index({ resources }: { resources: Resource[] }) {
 
                     {resources.length === 0 && (
                         <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                            <p className="text-slate-400 font-bold">No assets match your search.</p>
-                            <Link href={route('admin.resources')} className="text-blue-600 text-xs mt-2 inline-block font-bold uppercase">Clear Filters</Link>
+                            <p className="text-slate-400 font-bold">No assets found in active list.</p>
+                            <Link href={route('admin.resources')} className="text-blue-600 text-xs mt-2 inline-block font-bold uppercase">Reset Search</Link>
                         </div>
                     )}
 
