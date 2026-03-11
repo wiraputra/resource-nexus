@@ -53,14 +53,41 @@ class ResourceController extends Controller
     }
 
     /**
+     * Menampilkan halaman form edit untuk resource tertentu.
+     */
+    public function edit(Resource $resource): Response
+    {
+        return Inertia::render('Admin/Resources/Edit', [
+            'resource' => $resource,
+            'categories' => Category::all()
+        ]);
+    }
+
+    /**
+     * Memproses perubahan data resource di database.
+     */
+    public function update(Request $request, Resource $resource): RedirectResponse
+    {
+        $validated = $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status'      => 'required|in:available,maintenance,busy',
+        ]);
+
+        $resource->update($validated);
+
+        return redirect()->route('admin.resources')
+            ->with('message', 'Resource successfully updated!');
+    }
+
+    /**
      * Menghapus resource dari database.
      */
     public function destroy(Resource $resource): RedirectResponse
     {
-        // Menghapus data dari database
         $resource->delete();
 
-        // Redirect kembali dengan pesan sukses
         return redirect()->route('admin.resources')
             ->with('message', 'Resource successfully deleted!');
     }
