@@ -7,13 +7,14 @@ use App\Models\Booking;
 use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth; // Tambahkan ini untuk memperbaiki error 'id'
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BookingController extends Controller
 {
     /**
-     * Menampilkan daftar semua riwayat peminjaman.
+     * Menampilkan daftar semua riwayat peminjaman (Untuk Admin).
      */
     public function index(): Response
     {
@@ -29,8 +30,8 @@ class BookingController extends Controller
      */
     public function calendar(): Response
     {
-        // Ambil data booking dan ubah formatnya untuk FullCalendar
         $events = Booking::with(['resource', 'user'])
+            // Hanya tampilkan yang disetujui atau masih menunggu
             ->whereIn('status', ['approved', 'pending'])
             ->get()
             ->map(function ($booking) {
@@ -39,7 +40,7 @@ class BookingController extends Controller
                     'title' => ($booking->resource->name ?? 'Deleted') . ' (' . ($booking->user->name ?? 'User') . ')',
                     'start' => $booking->start_time,
                     'end'   => $booking->end_time,
-                    // Penentuan warna berdasarkan status
+                    // Warna: Biru untuk Approved, Amber untuk Pending
                     'color' => $booking->status === 'approved' ? '#3b82f6' : '#f59e0b',
                 ];
             });
@@ -50,11 +51,10 @@ class BookingController extends Controller
     }
 
     /**
-     * Memproses permintaan booking baru dan mengecek bentrok jadwal.
+     * Memproses permintaan booking baru dengan status awal 'pending'.
      */
     public function store(Request $request): RedirectResponse
     {
-        // 1. Validasi Input Dasar
         $request->validate([
             'resource_id' => 'required|exists:resources,id',
             'start_time'  => 'required|date|after:now',
@@ -65,7 +65,7 @@ class BookingController extends Controller
         $start = $request->start_time;
         $end = $request->end_time;
 
-        // 2. LOGIKA INTI: Cek Overlap (Jadwal Bentrok)
+        // Cek Overlap (Termasuk mengecek yang masih berstatus pending)
         $isConflict = Booking::where('resource_id', $resourceId)
             ->where(function ($query) use ($start, $end) {
                 $query->where('start_time', '<', $end)
@@ -74,24 +74,41 @@ class BookingController extends Controller
             ->whereIn('status', ['approved', 'pending'])
             ->exists();
 
-        // 3. Jika bentrok, kembalikan dengan pesan error
         if ($isConflict) {
             return back()->withErrors([
-                'start_time' => 'Maaf, aset ini sudah dipesan orang lain pada rentang waktu tersebut.'
+                'start_time' => 'Maaf, aset ini sudah dipesan atau sedang dalam peninjauan pada jam tersebut.'
             ]);
         }
 
-        // 4. Jika aman, simpan data booking
+        // Simpan dengan status PENDING
         Booking::create([
-            'user_id'     => auth()->id(),
+            'user_id'     => Auth::id(), // Sekarang aman karena facade Auth sudah diimport
             'resource_id' => $resourceId,
             'start_time'  => $start,
             'end_time'    => $end,
-            'status'      => 'approved',
+            'status'      => 'pending',
         ]);
 
-        // 5. Kembali ke halaman resources dengan notifikasi sukses
         return redirect()->route('admin.resources')
-            ->with('message', 'Booking berhasil dibuat! Jadwal Anda telah tercatat.');
+            ->with('message', 'Booking request sent! Waiting for Admin approval.');
+    }
+
+    /**
+     * Mengubah status booking (Approve atau Reject).
+     * Hanya bisa diakses oleh Admin.
+     */
+    public function updateStatus(Request $request, Booking $booking): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:approved,rejected'
+        ]);
+
+        $booking->update([
+            'status' => $validated['status']
+        ]);
+
+        $msg = $validated['status'] === 'approved' ? 'Booking Approved!' : 'Booking Rejected.';
+
+        return back()->with('message', $msg);
     }
 }

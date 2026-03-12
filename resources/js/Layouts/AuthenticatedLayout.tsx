@@ -10,14 +10,19 @@ export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const user = usePage().props.auth.user;
+    // AMBIL DATA SECARA DEFENSIVE
+    const { auth }: any = usePage().props;
+    const user = auth?.user;
+
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
-    return (
-        
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+    // KITA HAPUS BLOK "if (!user)" agar tidak tersangkut (stuck)
+    // Keamanan route sudah ditangani oleh middleware 'auth' di Laravel
 
-            {/* Navbar: Menggunakan Glassmorphism (Efek Blur) di Dark Mode */}
+    return (
+        <div className="min-h-screen bg-slate-50 transition-colors duration-500 dark:bg-slate-950">
+
+            {/* Navbar Modern dengan Glassmorphism */}
             <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-xl transition-colors duration-500 dark:border-slate-800 dark:bg-slate-900/80">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between items-center">
@@ -28,16 +33,23 @@ export default function Authenticated({
                                 </Link>
                             </div>
 
+                            {/* Menu Navigasi Desktop */}
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>
                                     Dashboard
                                 </NavLink>
+
                                 <NavLink href={route('admin.resources')} active={route().current('admin.resources*')}>
                                     Resources
                                 </NavLink>
-                                <NavLink href={route('admin.bookings.index')} active={route().current('admin.bookings.index')}>
-                                    Bookings
-                                </NavLink>
+
+                                {/* Proteksi Menu: Hanya muncul jika role admin ada */}
+                                {user?.role === 'admin' && (
+                                    <NavLink href={route('admin.bookings.index')} active={route().current('admin.bookings.index')}>
+                                        Bookings
+                                    </NavLink>
+                                )}
+
                                 <NavLink href={route('admin.calendar')} active={route().current('admin.calendar')}>
                                     Calendar
                                 </NavLink>
@@ -45,7 +57,6 @@ export default function Authenticated({
                         </div>
 
                         <div className="hidden sm:ms-6 sm:flex sm:items-center gap-4">
-                            {/* Tombol Toggle Tema */}
                             <ThemeToggle />
 
                             <div className="relative">
@@ -56,7 +67,8 @@ export default function Authenticated({
                                                 type="button"
                                                 className="inline-flex items-center rounded-xl border border-transparent bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition-all hover:text-slate-900 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200 focus:outline-none shadow-sm"
                                             >
-                                                {user.name}
+                                                {/* Gunakan tanda tanya (?) agar tidak error jika nama belum dimuat */}
+                                                {user?.name || 'Loading...'}
                                                 <svg className="-me-0.5 ms-2 h-4 w-4 opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                                                 </svg>
@@ -71,7 +83,7 @@ export default function Authenticated({
                             </div>
                         </div>
 
-                        {/* Mobile Toggle & Hamburger */}
+                        {/* Mobile Menu Toggle */}
                         <div className="-me-2 flex items-center sm:hidden gap-2">
                             <ThemeToggle />
                             <button
@@ -92,17 +104,21 @@ export default function Authenticated({
                     <div className="space-y-1 pb-3 pt-2 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
                         <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>Dashboard</ResponsiveNavLink>
                         <ResponsiveNavLink href={route('admin.resources')} active={route().current('admin.resources*')}>Resources</ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('admin.bookings.index')} active={route().current('admin.bookings.index')}>Bookings</ResponsiveNavLink>
+
+                        {user?.role === 'admin' && (
+                            <ResponsiveNavLink href={route('admin.bookings.index')} active={route().current('admin.bookings.index')}>Bookings</ResponsiveNavLink>
+                        )}
+
                         <ResponsiveNavLink href={route('admin.calendar')} active={route().current('admin.calendar')}>Calendar</ResponsiveNavLink>
                     </div>
                 </div>
             </nav>
 
-            {/* Page Header: Teks akan otomatis putih di Dark Mode */}
+            {/* Page Header */}
             {header && (
                 <header className="bg-white border-b border-slate-100 transition-colors duration-500 dark:bg-slate-900 dark:border-slate-800 shadow-sm">
                     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-                        <div className="text-slate-900 dark:text-white font-black">
+                        <div className="text-slate-900 dark:text-white transition-colors">
                             {header}
                         </div>
                     </div>

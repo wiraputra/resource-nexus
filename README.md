@@ -1,59 +1,111 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📦 ResourceNexus
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**ResourceNexus** adalah sistem manajemen aset dan reservasi tingkat enterprise yang dirancang untuk mengelola sumber daya fisik perusahaan (ruangan, kendaraan, perangkat elektronik) dengan presisi tinggi dan antarmuka modern.
 
-## About Laravel
+![Tech Stack](https://img.shields.io/badge/Stack-Laravel_12_%2B_React_19-blue?style=for-the-badge&logo=laravel)
+![Tailwind](https://img.shields.io/badge/Styling-Tailwind_CSS_4-38B2AC?style=for-the-badge&logo=tailwind-css)
+![Inertia](https://img.shields.io/badge/Bridge-Inertia.js_2-9553E9?style=for-the-badge&logo=inertia)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Fitur Utama
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+-   🛡️ **Role-Based Access Control (RBAC):** Pemisahan akses antara Administrator (Manager) dan Staff (Peminjam).
+-   📅 **Intelligent Booking System:** Logika pencegahan bentrok jadwal (*Collision Prevention*) untuk memastikan satu aset tidak dipesan ganda di jam yang sama.
+-   🗓️ **Visual Calendar View:** Integrasi FullCalendar untuk memantau seluruh jadwal peminjaman secara visual.
+-   📊 **Advanced Analytics:** Visualisasi data menggunakan Recharts untuk melihat tren peminjaman dan distribusi aset.
+-   📑 **PDF Reporting:** Generate laporan resmi seluruh riwayat peminjaman dalam format PDF.
+-   🗑️ **Soft Deletes & Recovery:** Keamanan data dengan fitur tong sampah (Trash Bin) untuk memulihkan aset yang tidak sengaja terhapus.
+-   ⛅ **Real-time Weather Intelligence:** Widget cuaca cerdas berdasarkan lokasi terkini pengguna menggunakan OpenWeather API.
+-   🌓 **Luxury Dark Mode:** Transisi tema gelap dan terang yang halus dengan persistensi LocalStorage.
+-   🔍 **Search & Filter:** Pencarian aset secara instan berdasarkan nama atau deskripsi.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🚀 Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Layer | Technology |
+| :--- | :--- |
+| **Backend** | Laravel 12 (PHP 8.2+) |
+| **Frontend** | React 19 + TypeScript |
+| **Bridge** | Inertia.js 2.0 |
+| **Styling** | Tailwind CSS 4.0 |
+| **Database** | MySQL / MariaDB |
+| **Charts** | Recharts |
+| **Icons** | Lucide React |
+| **Reporting** | Laravel DomPDF |
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🛠️ Instalasi
 
-### Premium Partners
+Ikuti langkah berikut untuk menjalankan project di komputer lokal Anda:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1.  **Clone Repository**
+    ```bash
+    git clone https://github.com/username/resource-nexus.git
+    cd resource-nexus
+    ```
 
-## Contributing
+2.  **Instal Dependensi Backend**
+    ```bash
+    composer install
+    ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3.  **Instal Dependensi Frontend**
+    ```bash
+    npm install --legacy-peer-deps
+    ```
 
-## Code of Conduct
+4.  **Konfigurasi Environment**
+    - Salin `.env.example` menjadi `.env`
+    - Atur koneksi database Anda (MySQL)
+    - Masukkan `OPENWEATHER_API_KEY` (Opsional untuk fitur cuaca)
+    ```bash
+    php artisan key:generate
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5.  **Migrasi & Seeding (Akun Default)**
+    ```bash
+    php artisan migrate:fresh --seed
+    ```
 
-## Security Vulnerabilities
+6.  **Hubungkan Storage**
+    ```bash
+    php artisan storage:link
+    ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+7.  **Jalankan Aplikasi**
+    Buka dua terminal dan jalankan:
+    - Terminal 1: `php artisan serve`
+    - Terminal 2: `npm run dev`
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🔑 Akun Demo (Default)
+
+Gunakan kredensial berikut setelah menjalankan seeder:
+
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Administrator** | `admin@nexus.com` | `password` |
+| **Regular Staff** | `staff@nexus.com` | `password` |
+
+---
+
+## 📂 Struktur Project Utama
+
+-   `app/Http/Controllers/Admin` - Logika bisnis (Resources, Bookings, Reports).
+-   `app/Http/Middleware/IsAdmin.php` - Guard keamanan akses Admin.
+-   `resources/js/Pages` - Komponen UI React 19.
+-   `resources/js/Layouts` - Layout utama dengan fitur Dark Mode.
+-   `database/migrations` - Struktur tabel database modern.
+
+---
+
+## 📄 Lisensi
+
+Project ini dibuat untuk tujuan latihan pengembangan aplikasi *full-stack* modern. Silakan digunakan dan dimodifikasi sesuai kebutuhan.
+
+---
+Dikembangkan dengan ❤️ menggunakan **Laravel 12** dan **React 19**.

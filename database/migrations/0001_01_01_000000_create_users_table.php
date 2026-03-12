@@ -7,26 +7,42 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Jalankan migrasi untuk membuat tabel users dan pendukungnya.
      */
     public function up(): void
     {
+        // 1. TABEL USERS (Disesuaikan dengan fitur Profile & Role)
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+
+            // Autentikasi Dasar
+            $table->string('name'); // Akan berfungsi sebagai First Name
+            $table->string('last_name')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // Sistem Role (Admin / Staff)
+            $table->string('role')->default('staff');
+
+            // Informasi Profil (Sesuai Desain UI)
+            $table->string('avatar')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('location')->nullable();
+            $table->text('summary')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });
 
+        // 2. TABEL TOKEN PASSWORD (Bawaan Laravel)
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
+        // 3. TABEL SESI (Bawaan Laravel)
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
@@ -38,7 +54,7 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Balikkan migrasi.
      */
     public function down(): void
     {

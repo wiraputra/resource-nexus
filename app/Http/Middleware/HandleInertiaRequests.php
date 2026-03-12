@@ -28,15 +28,33 @@ class HandleInertiaRequests extends Middleware
      * @return array<string, mixed>
      */
     public function share(Request $request): array
-    {
-        return [
-            ...parent::share($request),
-            'auth' => [
-                'user' => $request->user(),
-            ],
-            'flash' => [
-                'message' => fn() => $request->session()->get('message'),
-            ],
-        ];
-    }
+{
+    return [
+        ...parent::share($request),
+
+        // Data Autentikasi
+        'auth' => [
+            'user' => $request->user() ? [
+                'id' => $request->user()->id,
+                'name' => $request->user()->name,
+                'last_name' => $request->user()->last_name, // Tambahkan ini agar bisa dipanggil di Profile/Dashboard
+                'email' => $request->user()->email,
+                'role' => $request->user()->role, // SANGAT PENTING untuk proteksi Menu di React
+                'avatar' => $request->user()->avatar,
+            ] : null,
+        ],
+
+        // Data Notifikasi (Flash Message)
+        'flash' => [
+            'message' => fn () => $request->session()->get('message'),
+            'error'   => fn () => $request->session()->get('error'), // Tambahkan catch error juga
+        ],
+
+        // Ziggy (Opsional: Memastikan fungsi route() selalu sinkron di JS)
+        'ziggy' => fn () => [
+            ...(new \Tighten\Ziggy\Ziggy)->toArray(),
+            'location' => $request->url(),
+        ],
+    ];
+}
 }
